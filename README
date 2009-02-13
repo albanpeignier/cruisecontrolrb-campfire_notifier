@@ -1,0 +1,9 @@
+Make status available on Campfire...
+
+# project.campfire_notifier.subdomain     = ''
+# project.campfire_notifier.username      = ''
+# project.campfire_notifier.password      = ''
+# project.campfire_notifier.room          = '' 
+# project.campfire_notifier.trac_url      = '***/trac/***/changeset'
+# project.campfire_notifier.broken_image  = 'http://***/sad.png'
+# project.campfire_notifier.fixed_image   = 'http://***/happy.png'
