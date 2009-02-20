@@ -1,9 +1,27 @@
+= CampFire Notifier
+
 Make status available on Campfire...
 
-# project.campfire_notifier.subdomain     = ''
-# project.campfire_notifier.username      = ''
-# project.campfire_notifier.password      = ''
-# project.campfire_notifier.room          = '' 
-# project.campfire_notifier.trac_url      = '***/trac/***/changeset'
-# project.campfire_notifier.broken_image  = 'http://***/sad.png'
-# project.campfire_notifier.fixed_image   = 'http://***/happy.png'
+== Install
+
+  gem install tinder
+
+On debian system, tinder requires:
+
+  sudo apt-get install ruby-dev libopenssl-ruby
+
+== Configuration
+
+  Project.configure do |project|
+
+    project.campfire_notifier.subdomain     = 'tryphon'
+    project.campfire_notifier.username      = 'ccontrol'
+    project.campfire_notifier.password      = 'secret'
+    project.campfire_notifier.room          = 'Builds' 
+
+    # Optional:
+    project.campfire_notifier.trac_url      = '***/trac/***/changeset'
+    project.campfire_notifier.broken_image  = 'http://***/sad.png'
+    project.campfire_notifier.fixed_image   = 'http://***/happy.png'
+
+  end
