@@ -67,14 +67,20 @@ class CampfireNotifier
       
       CruiseControl::Log.debug("Campfire notifier: sending notices")      
       
-      revisions       = ChangesetLogParser.new.parse_log( build.changeset.split("\n") )    
-      committed_by    = revisions.collect { |rev| rev.committed_by }.uniq.to_sentence
-    
+      log_parser      = eval("#{build.project.source_control.class}::LogParser").new
+      revisions       = log_parser.parse( build.changeset.split("\n") ) rescue []
+
+      committers      = revisions.collect { |rev| rev.committed_by }.uniq
+      
+      title_parts = []
+      title_parts << "#{committers.to_sentence}:" if committers
+      title_parts << "#{build.project.name}/#{build.label} is"
+
       if build.failed?
-        title = "#{committed_by.capitalize} BROKE #{build.project.name}/#{build.label}. Bad #{committed_by}!!"
+        title_parts << "BROKEN"
         image = broken_image
       else
-        title = "#{committed_by.capitalize} FIXED #{build.project.name}/#{build.label}. All hail #{committed_by}!!"
+        title_parts << "FIXED"
         image = fixed_image
       end
           
@@ -82,7 +88,7 @@ class CampfireNotifier
       urls +=  " | #{trac_url_with_query(revisions)}" if trac_url
     
       @client_room.speak image if image
-      @client_room.speak title
+      @client_room.speak title_parts.join(' ')
       @client_room.paste( build.changeset )  
       @client_room.speak urls
     
