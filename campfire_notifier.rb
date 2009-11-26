@@ -1,3 +1,5 @@
+require 'tinder'
+
 class CampfireNotifier
   attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image
 
@@ -99,3 +101,5 @@ class CampfireNotifier
   end
 
 end
+
+Project.plugin :campfire_notifier
