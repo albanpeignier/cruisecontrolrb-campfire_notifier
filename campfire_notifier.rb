@@ -1,13 +1,14 @@
 require 'tinder'
 
 class CampfireNotifier
-  attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image
+  attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl
 
   def initialize(project = nil)
     @subdomain = nil
     @username = nil
     @password = nil
     @room = nil
+    @ssl = false
   end
 
   def enabled?
@@ -20,7 +21,7 @@ class CampfireNotifier
              
     CruiseControl::Log.debug("Campfire notifier: connecting to #{@subdomain}.campfirenow.com")
     
-    @client = Tinder::Campfire.new @subdomain
+    @client = Tinder::Campfire.new @subdomain, :ssl => @ssl
     @client.login @username, @password
     
     @client_room = @client.find_room_by_name(@room)
