@@ -1,7 +1,7 @@
 require 'tinder'
 
 class CampfireNotifier
-  attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl
+  attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
   def initialize(project = nil)
     @subdomain = nil
@@ -9,6 +9,7 @@ class CampfireNotifier
     @password = nil
     @room = nil
     @ssl = false
+    @only_failed_builds = false
   end
 
   def enabled?
@@ -52,7 +53,7 @@ class CampfireNotifier
   end
 
   def build_fixed(fixed_build, previous_build)
-    notify_of_build_outcome(fixed_build)
+    notify_of_build_outcome(fixed_build) unless @only_failed_builds
   end
   
   def trac_url_with_query revisions
@@ -82,7 +83,9 @@ class CampfireNotifier
       if build.failed?
         title_parts << "BROKEN"
         image = broken_image
-      else
+      end
+      
+      unless @only_failed_builds
         title_parts << "FIXED"
         image = fixed_image
       end

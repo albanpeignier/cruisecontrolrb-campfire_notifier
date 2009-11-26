@@ -24,5 +24,6 @@ On debian system, tinder requires:
     project.campfire_notifier.trac_url      = '***/trac/***/changeset'
     project.campfire_notifier.broken_image  = 'http://***/sad.png'
     project.campfire_notifier.fixed_image   = 'http://***/happy.png'
+    project.campfire_notifier.only_failed_builds = true
 
   end
