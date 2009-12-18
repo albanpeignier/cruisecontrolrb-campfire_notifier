@@ -1,10 +1,9 @@
-require 'tinder'
+require 'broach'
 
 class CampfireNotifier
   attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
   def initialize(project = nil)
-    @subdomain = nil
     @username = nil
     @password = nil
     @room = nil
@@ -20,21 +19,19 @@ class CampfireNotifier
     
     return unless enabled?
              
-    CruiseControl::Log.debug("Campfire notifier: connecting to #{@subdomain}.campfirenow.com")
+    CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
     
-    @client = Tinder::Campfire.new @subdomain, :ssl => @ssl
-    @client.login @username, @password
-    
-    @client_room = @client.find_room_by_name(@room)
-    @client_room.join  
+    Broach.settings {:account => @username, 
+                               :token => @password, 
+                               :use_ssl => @ssl}
+    @client_room = Broach::Room.find_by_name(@room) 
   end
 
   def disconnect
     
     return unless enabled?
     
-    CruiseControl::Log.debug("Campfire notifier: disconnecting from #{@subdomain}.campfirenow.com")
-    @client.logout if @client.respond_to?(:logged_in?) && @client.logged_in?
+    CruiseControl::Log.debug("Campfire notifier: disconnecting from campfire")
   end
 
   def reconnect
