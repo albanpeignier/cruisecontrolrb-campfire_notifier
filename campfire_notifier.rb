@@ -75,16 +75,16 @@ class CampfireNotifier
       
       title_parts = []
       title_parts << "#{committers.to_sentence}:" if committers
-      title_parts << "#{build.project.name}/#{build.label} is"
+      title_parts << "Build #{build.label} of #{build.project.name} is"
 
       if build.failed?
         title_parts << "BROKEN"
-        image = broken_image
+        image = @broken_image
       end
       
       unless @only_failed_builds
         title_parts << "FIXED"
-        image = fixed_image
+        image = @fixed_image
       end
           
       urls  =  "#{build.url}"                         if Configuration.dashboard_url
