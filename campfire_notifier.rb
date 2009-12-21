@@ -55,7 +55,7 @@ class CampfireNotifier
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
   end
   
-  def notify_of_build_outcome(build)
+  def notify_of_build_outcome(build, previous_build = nil)
     return unless enabled?
     
     connect
