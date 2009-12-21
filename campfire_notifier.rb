@@ -55,41 +55,36 @@ class CampfireNotifier
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
   end
   
-  def notify_of_build_outcome(build, previous_build = nil)
+  def notify_of_build_outcome(build)
     return unless enabled?
     
     connect
-    begin
       
-      CruiseControl::Log.debug("Campfire notifier: sending notices")      
-      
-      log_parser = eval("#{build.project.source_control.class}::LogParser").new
-      revisions = log_parser.parse( build.changeset.split("\n") ) rescue []
-      committers = revisions.collect { |rev| rev.committed_by }.uniq
-      
-      title_parts = []
-      title_parts << "#{committers.to_sentence}:" if committers
-      title_parts << "Build #{build.label} of #{build.project.name} is"
+    CruiseControl::Log.debug("Campfire notifier: sending notices")      
+    
+    log_parser = eval("#{build.project.source_control.class}::LogParser").new
+    revisions = log_parser.parse( build.changeset.split("\n") ) rescue []
+    committers = revisions.collect { |rev| rev.committed_by }.uniq
+    
+    title_parts = []
+    title_parts << "#{committers.to_sentence}:" if committers
+    title_parts << "Build #{build.label} of #{build.project.name} is"
 
-      if build.failed?
-        title_parts << "BROKEN"
-        image = @broken_image
-      elsif !@only_failed_builds
-        title_parts << (previous_build ? "FIXED" : "SUCCESS"
-        image = @fixed_image
-      end
-      
-      urls = "#{build.url}" if Configuration.dashboard_url
-      urls += " | #{trac_url_with_query(revisions)}" if trac_url
-    
-      @client_room.speak image if image
-      @client_room.speak title_parts.join(' ')
-      @client_room.paste( build.changeset )  
-      @client_room.speak urls
-    
-    ensure
-      disconnect rescue nil
+    if build.failed?
+      title_parts << "BROKEN"
+      image = @broken_image
+    elsif !@only_failed_builds
+      title_parts << (previous_build ? "FIXED" : "SUCCESS")
+      image = @fixed_image
     end
+    
+    urls = "#{build.url}" if Configuration.dashboard_url
+    urls += " | #{trac_url_with_query(revisions)}" if trac_url
+  
+    @client_room.speak image if image
+    @client_room.speak title_parts.join(' ')
+    @client_room.paste( build.changeset )  
+    @client_room.speak urls
   end
 end
 
