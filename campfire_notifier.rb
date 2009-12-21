@@ -1,10 +1,10 @@
 require 'broach'
 
 class CampfireNotifier
-  attr_accessor :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
+  attr_accessor :account, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
   def initialize(project = nil)
-    @username = nil
+    @account = nil
     @password = nil
     @room = nil
     @ssl = false
@@ -12,14 +12,14 @@ class CampfireNotifier
   end
 
   def enabled?
-    @username && @password && @room
+    @account && @password && @room
   end
 
   def connect
     return unless enabled?
              
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
-    Broach.settings = {'account' => @username, 
+    Broach.settings = {'account' => @account, 
                                'token' => @password, 
                                'use_ssl' => @ssl}
     @client_room = Broach::Room.find_by_name(@room) 
@@ -51,11 +51,11 @@ class CampfireNotifier
   
   def trac_url_with_query revisions
     first_rev = revisions.first.number
-    last_rev  = revisions.last.number    
+    last_rev = revisions.last.number    
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
   end
   
-  def notify_of_build_outcome(build)
+  def notify_of_build_outcome(build, previous_build = nil)
     return unless enabled?
     
     connect
@@ -63,9 +63,9 @@ class CampfireNotifier
       
       CruiseControl::Log.debug("Campfire notifier: sending notices")      
       
-      log_parser      = eval("#{build.project.source_control.class}::LogParser").new
-      revisions       = log_parser.parse( build.changeset.split("\n") ) rescue []
-      committers      = revisions.collect { |rev| rev.committed_by }.uniq
+      log_parser = eval("#{build.project.source_control.class}::LogParser").new
+      revisions = log_parser.parse( build.changeset.split("\n") ) rescue []
+      committers = revisions.collect { |rev| rev.committed_by }.uniq
       
       title_parts = []
       title_parts << "#{committers.to_sentence}:" if committers
@@ -74,15 +74,13 @@ class CampfireNotifier
       if build.failed?
         title_parts << "BROKEN"
         image = @broken_image
-      end
-      
-      unless @only_failed_builds
-        title_parts << "FIXED"
+      elsif !@only_failed_builds
+        title_parts << (previous_build ? "FIXED" : "SUCCESS"
         image = @fixed_image
       end
-          
-      urls  =  "#{build.url}"                         if Configuration.dashboard_url
-      urls +=  " | #{trac_url_with_query(revisions)}" if trac_url
+      
+      urls = "#{build.url}" if Configuration.dashboard_url
+      urls += " | #{trac_url_with_query(revisions)}" if trac_url
     
       @client_room.speak image if image
       @client_room.speak title_parts.join(' ')
