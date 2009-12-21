@@ -25,20 +25,6 @@ class CampfireNotifier
     @client_room = Broach::Room.find_by_name(@room) 
   end
 
-  def disconnect
-    return unless enabled?
-    CruiseControl::Log.debug("Campfire notifier: disconnecting from campfire")
-  end
-
-  def reconnect
-    disconnect
-    connect
-  end
-
-  def connected?
-    @client.respond_to?(:logged_in?) && @client.logged_in?
-  end
-
   def build_finished(build)
     if build.failed?
       notify_of_build_outcome(build)
@@ -67,7 +53,7 @@ class CampfireNotifier
     committers = revisions.collect { |rev| rev.committed_by }.uniq
     
     title_parts = []
-    title_parts << "#{committers.to_sentence}:" if committers
+    title_parts << "#{committers.to_sentence}:" if committers and committers.length > 0
     title_parts << "Build #{build.label} of #{build.project.name} is"
 
     if build.failed?
