@@ -1,7 +1,7 @@
 require 'broach'
 
 class CampfireNotifier
-  attr_accessor :subdomain, :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
+  attr_accessor :username, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
   def initialize(project = nil)
     @username = nil
@@ -12,25 +12,21 @@ class CampfireNotifier
   end
 
   def enabled?
-    subdomain && username && password && room
+    @username && @password && @room
   end
 
   def connect
-    
     return unless enabled?
              
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
-    
-    Broach.settings {:account => @username, 
-                               :token => @password, 
-                               :use_ssl => @ssl}
+    Broach.settings = {'account' => @username, 
+                               'token' => @password, 
+                               'use_ssl' => @ssl}
     @client_room = Broach::Room.find_by_name(@room) 
   end
 
   def disconnect
-    
     return unless enabled?
-    
     CruiseControl::Log.debug("Campfire notifier: disconnecting from campfire")
   end
 
@@ -60,7 +56,6 @@ class CampfireNotifier
   end
   
   def notify_of_build_outcome(build)
-    
     return unless enabled?
     
     connect
@@ -70,7 +65,6 @@ class CampfireNotifier
       
       log_parser      = eval("#{build.project.source_control.class}::LogParser").new
       revisions       = log_parser.parse( build.changeset.split("\n") ) rescue []
-
       committers      = revisions.collect { |rev| rev.committed_by }.uniq
       
       title_parts = []
@@ -98,9 +92,7 @@ class CampfireNotifier
     ensure
       disconnect rescue nil
     end
-    
   end
-
 end
 
 Project.plugin :campfire_notifier
