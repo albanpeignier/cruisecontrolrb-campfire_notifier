@@ -10,22 +10,21 @@ On debian system, broach  requires:
 
   sudo apt-get install ruby-dev libopenssl-ruby
 
-
 Where you set your $CRUISE_HOME to be, usually ~/.cruise, there will
 be a builder_plugins folder.  I have it setup to where I clone this plugin
 to my $CRUISE_HOME folder and create a symlink from inside the builder_plugins
 folder into the cruisecontrolrb-campfire-notifier folder.
 
-~/.cruise
-  builder_plugins/
-    campfire_notifier.rb -> ~/.cruise/cruisecontrolrb-campfire_notifier/campfire_notifier.rb
-  cruisecontrolrb-campfire_notifier/
-    README.rdoc
-    campfire_notifier.rb
-  data.version
-  projects/
-  site.css
-  site_config.rb
+  ~/.cruise
+    builder_plugins/
+      campfire_notifier.rb -> ~/.cruise/cruisecontrolrb-campfire_notifier/campfire_notifier.rb
+    cruisecontrolrb-campfire_notifier/
+      README.rdoc
+      campfire_notifier.rb
+    data.version
+    projects/
+    site.css
+    site_config.rb
     
 == Configuration
 
@@ -46,3 +45,11 @@ have a cruise_config.rb file:
     project.campfire_notifier.only_failed_builds    = true
 
   end
+
+== Tests
+  
+  gem install mocha
+  gem install shoulda
+  rake
+
+The Rakefile will check for all 3 required gems (broach, mocha, and shoulda) before running the tests.
