@@ -1,18 +1,20 @@
 require 'broach'
 
 class CampfireNotifier
-  attr_accessor :account, :password, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
+  attr_accessor :account, :token, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
   def initialize(project = nil)
     @account = nil
-    @password = nil
+    @token = nil
     @room = nil
     @ssl = false
     @only_failed_builds = false
   end
 
+  alias_method :password=, :token=
+
   def enabled?
-    @account && @password && @room
+    @account && @token && @room
   end
 
   def connect
@@ -20,7 +22,7 @@ class CampfireNotifier
              
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
     Broach.settings = {'account' => @account, 
-                               'token' => @password, 
+                               'token' => @token, 
                                'use_ssl' => @ssl}
     @client_room = Broach::Room.find_by_name(@room) 
   end
