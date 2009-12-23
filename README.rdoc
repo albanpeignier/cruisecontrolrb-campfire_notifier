@@ -35,7 +35,7 @@ have a cruise_config.rb file:
   Project.configure do |project|
 
     project.campfire_notifier.account               = 'ccontrol'
-    project.campfire_notifier.password              = 'secret'
+    project.campfire_notifier.token                 = 'secret'
     project.campfire_notifier.room                  = 'Builds' 
 
     # Optional:
