@@ -17,10 +17,6 @@ class CampfireNotifier
     @account && @token && @room
   end
 
-  def connected?
-    @client_room
-  end
-
   def connect
     return unless enabled?
              
@@ -28,7 +24,8 @@ class CampfireNotifier
     Broach.settings = {'account' => @account, 
                                'token' => @token, 
                                'use_ssl' => @ssl}
-    @client_room = Broach::Room.find_by_name(@room) 
+    client_room = Broach::Room.find_by_name(@room) 
+    client_room
   end
 
   def build_finished(build)
@@ -60,7 +57,7 @@ class CampfireNotifier
   def notify_of_build_outcome(build, message)
     return unless enabled?
     
-    connect
+    client_room = connect
       
     CruiseControl::Log.debug("Campfire notifier: sending notices")      
     
@@ -76,10 +73,10 @@ class CampfireNotifier
     urls = "#{build.url}" if Configuration.dashboard_url
     urls += " | #{trac_url_with_query(revisions)}" if trac_url
   
-    @client_room.speak image if image
-    @client_room.speak title_parts.join(' ')
-    @client_room.paste( build.changeset )  
-    @client_room.speak urls
+    client_room.speak image if image
+    client_room.speak title_parts.join(' ')
+    client_room.paste( build.changeset )  
+    client_room.speak urls
   end
 end
 

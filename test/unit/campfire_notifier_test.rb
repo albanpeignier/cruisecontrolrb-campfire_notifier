@@ -9,6 +9,12 @@ module CruiseControl
   end
 end
 
+class Configuration
+  def self.dashboard_url
+    "http://tempuri.org"
+  end
+end
+
 class CampfireNotifierTest < Test::Unit::TestCase
   context "Campfire Notifier" do
     setup do
@@ -30,7 +36,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
       should "not be able to connect" do
         @campfire_notifier.connect
-        assert_nil @campfire_notifier.connected?
+        Broach.expects(:settings=).never
       end
     end
 
@@ -39,6 +45,13 @@ class CampfireNotifierTest < Test::Unit::TestCase
         @campfire_notifier.account = "account"
         @campfire_notifier.token = "token"
         @campfire_notifier.room = "Office"
+        @campfire_notifier.broken_image = "broken image"
+        @campfire_notifier.fixed_image = "fixed image"
+        
+        @build = stub('Build', :successful? => false, :label => "abcdef",
+                              :project => stub('Project', :name => "Test Project"),
+                              :changeset => "test changeset",
+                              :url => 'http://cruisecontrolrb.org/project/test_project') 
       end
 
       should "be enabled" do
@@ -61,12 +74,12 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
       context "on successful build" do
         setup do
-          @successful_build = stub('Build', :successful? => true) 
+          @build.stubs(:successful?).returns(true)
         end
 
         should "notify of build outcome" do
-          @campfire_notifier.expects(:notify_of_build_outcome).with(@successful_build, "SUCCESS")
-          @campfire_notifier.build_finished(@successful_build)
+          @campfire_notifier.expects(:notify_of_build_outcome).with(@build, "SUCCESS")
+          @campfire_notifier.build_finished(@build)
         end
 
         context "and only_failed_builds is true" do
@@ -76,33 +89,43 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
           should "not notify of build outcome" do
             @campfire_notifier.expects(:notify_of_build_outcome).never
-            @campfire_notifier.build_finished(@successful_build)
+            @campfire_notifier.build_finished(@build)
           end
         end
       end
 
       context "on failed build" do
         setup do
-          @failed_build = stub('Build') 
-          @campfire_notifier.expects(:notify_of_build_outcome).with(@failed_build, "BROKEN")
+          @campfire_notifier.expects(:notify_of_build_outcome).with(@build, "BROKEN")
         end
 
         should "notify of build outcome" do
-          @campfire_notifier.build_failed(@failed_build, 
+          @campfire_notifier.build_failed(@build, 
                                           previous_build = stub('Previous Build'))
         end
       end
 
       context "on fixed build" do
         setup do
-          @fixed_build = stub('Build') 
-          @campfire_notifier.expects(:notify_of_build_outcome).with(@fixed_build, "FIXED")
+          @campfire_notifier.expects(:notify_of_build_outcome).with(@build, "FIXED")
         end
 
         should "notify of build outcome" do
-          @campfire_notifier.build_fixed(@fixed_build, 
+          @campfire_notifier.build_fixed(@build, 
                                          previous_build = stub('Previous Build'))
         end
+      end
+
+      should "show the build label, image, project name, and message in campfire" do
+        office_room = stub('Room', :name => 'Office')
+        @campfire_notifier.stubs(:connect).returns(office_room)
+        @campfire_notifier.stubs(:get_changeset_committers).returns([])
+        office_room.expects(:speak).with("fixed image")
+        office_room.expects(:speak).with("Build abcdef of Test Project is SUCCESSFUL")
+        office_room.expects(:paste).with(@build.changeset)
+        office_room.expects(:speak).with('http://cruisecontrolrb.org/project/test_project')
+
+        @campfire_notifier.notify_of_build_outcome(@build, "SUCCESSFUL")
       end
     end
   end
