@@ -1,5 +1,6 @@
 require 'broach'
 
+
 class CampfireNotifier
   attr_accessor :account, :token, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
 
@@ -47,7 +48,7 @@ class CampfireNotifier
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
   end
 
-  def get_changest_committers(build)
+  def get_changeset_committers(build)
     log_parser = eval("#{build.project.source_control.class}::LogParser").new
     revisions = log_parser.parse( build.changeset.split("\n") ) rescue []
     committers = revisions.collect { |rev| rev.committed_by }.uniq
