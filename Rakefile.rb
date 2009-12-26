@@ -17,3 +17,17 @@ Rake::TestTask.new do |t|
   t.test_files = FileList['test/**/*_test.rb']
   t.verbose = true
 end
+
+begin
+  require 'rubygems'
+  require 'rcov/rcovtask'
+
+  Rcov::RcovTask.new do |t|
+    t.libs << "test"
+    t.test_files = FileList['test/**/*_test.rb']
+    t.verbose = true
+    t.rcov_opts = %w{--exclude / --include-file ^lib}
+  end
+rescue LoadError
+  puts "Can't load rcov, please install rcov gem"
+end
