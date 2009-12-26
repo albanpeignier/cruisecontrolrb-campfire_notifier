@@ -52,4 +52,8 @@ have a cruise_config.rb file:
   gem install shoulda
   rake
 
+== Test Coverage
+
+  gem install rcov
+  rake rcov
 The Rakefile will check for all 3 required gems (broach, mocha, and shoulda) before running the tests.
