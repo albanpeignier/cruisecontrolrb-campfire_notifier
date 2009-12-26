@@ -1,20 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 require File.dirname(__FILE__) + '/../../campfire_notifier'
 
-module CruiseControl
-  class Log
-    def self.debug(message)
-      true
-    end
-  end
-end
-
-class Configuration
-  def self.dashboard_url
-    "http://tempuri.org"
-  end
-end
-
 class CampfireNotifierTest < Test::Unit::TestCase
   context "Campfire Notifier" do
     setup do
@@ -113,6 +99,34 @@ class CampfireNotifierTest < Test::Unit::TestCase
         should "notify of build outcome" do
           @campfire_notifier.build_fixed(@build, 
                                          previous_build = stub('Previous Build'))
+        end
+      end
+
+      context "and trac url provided" do
+        setup do
+          @campfire_notifier.trac_url = 'http://temptracuri.org'
+          @revisions = stub('Revisions', :first => stub('first', :number => '123'),
+                                        :last => stub('last', :number => '234'))
+        end
+        
+        should "return trac url with query" do
+          trac_url_with_query = @campfire_notifier.trac_url_with_query(@revisions)
+          assert_equal "http://temptracuri.org?new=123&old=234", trac_url_with_query
+        end
+      end
+
+      context "and changeset exists" do
+        setup do
+          changeset = 'Build was manually requested.\nRevision ...a124eaf committed by John Smith  <jsmith@company.com> on 2009-12-20 09:58:14\n\n    made change\n\napp/controllers/application_controller.rb |    4 ++--\n1 files changed, 2 insertions(+), 2 deletions(-)'
+          @build = stub('Build', :changeset => changeset,
+                       :project => stub('Project',
+                          :source_control => stub('source control',
+                            :class => 'SourceControl')))
+        end
+
+        should "return changeset committers" do
+          committers = @campfire_notifier.get_changeset_committers(@build)
+          assert_equal ["committerabc"], committers
         end
       end
 
