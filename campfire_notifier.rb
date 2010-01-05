@@ -58,7 +58,11 @@ class CampfireNotifier
   def notify_of_build_outcome(build, message)
     return unless enabled?
     
-    client_room = connect
+    begin
+      client_room = connect
+    rescue Broach::AuthenticationError => e
+      raise "Campfire Connection Error: #{e.message}"
+    end
       
     CruiseControl::Log.debug("Campfire notifier: sending notices")      
     

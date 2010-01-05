@@ -26,6 +26,22 @@ class CampfireNotifierTest < Test::Unit::TestCase
       end
     end
 
+    context "when campfire account information is invalid" do
+      setup do
+        @campfire_notifier.account = "account"
+        @campfire_notifier.token = "badtoken"
+        @campfire_notifier.room = "room"
+
+        @campfire_notifier.expects(:connect).raises(Broach::AuthenticationError, 'Campfire Connection Error: x') 
+      end
+
+      should "show error message" do
+        assert_raise RuntimeError do
+          @campfire_notifier.notify_of_build_outcome(nil, nil)
+        end
+      end
+    end
+
     context "when account, token, and room are provided" do
       setup do
         @campfire_notifier.account = "account"
