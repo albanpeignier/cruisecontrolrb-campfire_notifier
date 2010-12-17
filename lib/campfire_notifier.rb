@@ -88,9 +88,7 @@ class CampfireNotifier < BuilderPlugin
     client_room.speak(image) if image
     client_room.speak(title_parts.join(' '))
     client_room.paste(build.changeset)
-    if urls.any?
-      client_room.speak(urls.join(" | "))
-    end
+    client_room.speak(urls.join(" | ")) if urls.any?
   end
 end
 
