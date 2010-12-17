@@ -22,6 +22,7 @@ SUCCESS and FAILED.
 
 Clone this repo into a suitable directory:
 
+    $ cd ~
     $ git clone git://github.com/h3h/cruisecontrolrb-campfire_notifier.git
     $ cd cruisecontrolrb-campfire_notifier
 
@@ -69,7 +70,7 @@ you'll find a `cruise_config.rb` file. For each project that you want to
 set up to notify Campfire, configure it with the following:
 
     Project.configure do |project|
-      project.campfire_notifier.account               = 'ccontrol'
+      project.campfire_notifier.account               = 'myaccount'
       project.campfire_notifier.token                 = 'secret'
       project.campfire_notifier.room                  = 'Builds'
 
