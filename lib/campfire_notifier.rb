@@ -34,18 +34,18 @@ class CampfireNotifier < BuilderPlugin
   def build_finished(build)
     return if @only_fixed_and_broken_builds
     if build.successful?
-      notify_of_build_outcome(build, "SUCCESS") unless @only_failed_builds
+      notify_of_build_outcome(build, "PASSED") unless @only_failed_builds
     else
-      notify_of_build_outcome(build, "FAILED")
+      notify_of_build_outcome(build, "FAILED!")
     end
   end
 
   def build_broken(broken_build, previous_build)
-    notify_of_build_outcome(broken_build, "BROKEN")
+    notify_of_build_outcome(broken_build, "BROKE!")
   end
 
   def build_fixed(fixed_build, previous_build)
-    notify_of_build_outcome(fixed_build, "FIXED") unless @only_failed_builds
+    notify_of_build_outcome(fixed_build, "WAS FIXED") unless @only_failed_builds
   end
 
   def trac_url_with_query(revisions)
@@ -76,7 +76,7 @@ class CampfireNotifier < BuilderPlugin
 
     title_parts = []
     title_parts << "#{committers.to_sentence}:" if committers.any?
-    title_parts << "Build #{build.label} of #{build.project.name} is"
+    title_parts << "Build #{build.label} of #{build.project.name} "
 
     title_parts << message
     image = (message == "BROKEN" ? @broken_image : @fixed_image)
