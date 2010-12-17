@@ -1,15 +1,16 @@
 require 'broach'
 
+class CampfireNotifier < BuilderPlugin
+  attr_accessor :account, :token, :room, :trac_url, :broken_image, :fixed_image
+  attr_accessor :ssl, :only_failed_builds, :only_fixed_and_broken_builds
 
-class CampfireNotifier
-  attr_accessor :account, :token, :room, :trac_url, :broken_image, :fixed_image, :ssl, :only_failed_builds
-
-  def initialize(project = nil)
+  def initialize(project=nil)
     @account = nil
     @token = nil
     @room = nil
     @ssl = false
     @only_failed_builds = false
+    @only_fixed_and_broken_builds = false
   end
 
   alias_method :password=, :token=
@@ -19,19 +20,24 @@ class CampfireNotifier
   end
 
   def connect
-    return unless enabled?
+    return unless self.enabled?
 
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
-    Broach.settings = {'account' => @account,
-                               'token' => @token,
-                               'use_ssl' => @ssl}
-    client_room = Broach::Room.find_by_name(@room)
-    client_room
+    Broach.settings = {
+      'account' => @account,
+      'token' => @token,
+      'use_ssl' => @ssl
+    }
+    return Broach::Room.find_by_name(@room)
   end
 
   def build_finished(build)
-    return if !build.successful?
-    notify_of_build_outcome(build, "SUCCESS") unless @only_failed_builds
+    return if @only_fixed_and_broken_builds
+    if build.successful?
+      notify_of_build_outcome(build, "SUCCESS") unless @only_failed_builds
+    else
+      notify_of_build_outcome(build, "FAILED")
+    end
   end
 
   def build_broken(broken_build, previous_build)
@@ -42,7 +48,7 @@ class CampfireNotifier
     notify_of_build_outcome(fixed_build, "FIXED") unless @only_failed_builds
   end
 
-  def trac_url_with_query revisions
+  def trac_url_with_query(revisions)
     first_rev = revisions.first.number
     last_rev = revisions.last.number
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
@@ -56,20 +62,20 @@ class CampfireNotifier
   end
 
   def notify_of_build_outcome(build, message)
-    return unless enabled?
+    return unless self.enabled?
 
     begin
-      client_room = connect
+      client_room = self.connect
     rescue Broach::AuthenticationError => e
       raise "Campfire Connection Error: #{e.message}"
     end
 
     CruiseControl::Log.debug("Campfire notifier: sending notices")
 
-    committers = get_changeset_committers(build)
+    committers = self.get_changeset_committers(build) || []
 
     title_parts = []
-    title_parts << "#{committers.to_sentence}:" if committers and committers.length > 0
+    title_parts << "#{committers.to_sentence}:" if committers.any?
     title_parts << "Build #{build.label} of #{build.project.name} is"
 
     title_parts << message
