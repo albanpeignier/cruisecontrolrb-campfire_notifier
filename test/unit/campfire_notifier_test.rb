@@ -1,5 +1,5 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require File.dirname(__FILE__) + '/../../campfire_notifier'
+require 'test_helper'
+require 'campfire_notifier'
 
 class CampfireNotifierTest < Test::Unit::TestCase
   context "Campfire Notifier" do
@@ -32,7 +32,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         @campfire_notifier.token = "badtoken"
         @campfire_notifier.room = "room"
 
-        @campfire_notifier.expects(:connect).raises(Broach::AuthenticationError, 'Campfire Connection Error: x') 
+        @campfire_notifier.expects(:connect).raises(Broach::AuthenticationError, 'Campfire Connection Error: x')
       end
 
       should "show error message" do
@@ -49,11 +49,11 @@ class CampfireNotifierTest < Test::Unit::TestCase
         @campfire_notifier.room = "Office"
         @campfire_notifier.broken_image = "broken image"
         @campfire_notifier.fixed_image = "fixed image"
-        
+
         @build = stub('Build', :successful? => false, :label => "abcdef",
                               :project => stub('Project', :name => "Test Project"),
                               :changeset => "test changeset",
-                              :url => 'http://cruisecontrolrb.org/project/test_project') 
+                              :url => 'http://cruisecontrolrb.org/project/test_project')
       end
 
       should "be enabled" do
@@ -64,12 +64,12 @@ class CampfireNotifierTest < Test::Unit::TestCase
         office_room = stub('Room', :name => 'Office')
         business_room = stub('Room', :name => 'Business')
         Broach::Room.stubs(:all).returns([office_room, business_room])
-        
+
         settings = {'account' => @campfire_notifier.account,
                     'token' => @campfire_notifier.token,
                     'use_ssl' => false}
         Broach.expects(:settings=).with(settings)
-        
+
         client_room = @campfire_notifier.connect
         assert_equal 'Office', client_room.name
       end
@@ -102,7 +102,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         end
 
         should "notify of build outcome" do
-          @campfire_notifier.build_failed(@build, 
+          @campfire_notifier.build_broken(@build,
                                           previous_build = stub('Previous Build'))
         end
       end
@@ -113,7 +113,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         end
 
         should "notify of build outcome" do
-          @campfire_notifier.build_fixed(@build, 
+          @campfire_notifier.build_fixed(@build,
                                          previous_build = stub('Previous Build'))
         end
       end
@@ -124,7 +124,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
           @revisions = stub('Revisions', :first => stub('first', :number => '123'),
                                         :last => stub('last', :number => '234'))
         end
-        
+
         should "return trac url with query" do
           trac_url_with_query = @campfire_notifier.trac_url_with_query(@revisions)
           assert_equal "http://temptracuri.org?new=123&old=234", trac_url_with_query

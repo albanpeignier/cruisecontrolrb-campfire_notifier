@@ -39,4 +39,3 @@ module SourceControl
     end
   end
 end
-

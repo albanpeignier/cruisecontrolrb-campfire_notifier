@@ -20,12 +20,12 @@ class CampfireNotifier
 
   def connect
     return unless enabled?
-             
+
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
-    Broach.settings = {'account' => @account, 
-                               'token' => @token, 
+    Broach.settings = {'account' => @account,
+                               'token' => @token,
                                'use_ssl' => @ssl}
-    client_room = Broach::Room.find_by_name(@room) 
+    client_room = Broach::Room.find_by_name(@room)
     client_room
   end
 
@@ -34,17 +34,17 @@ class CampfireNotifier
     notify_of_build_outcome(build, "SUCCESS") unless @only_failed_builds
   end
 
-  def build_failed(broken_build, previous_build)
+  def build_broken(broken_build, previous_build)
     notify_of_build_outcome(broken_build, "BROKEN")
   end
 
   def build_fixed(fixed_build, previous_build)
     notify_of_build_outcome(fixed_build, "FIXED") unless @only_failed_builds
   end
-  
+
   def trac_url_with_query revisions
     first_rev = revisions.first.number
-    last_rev = revisions.last.number    
+    last_rev = revisions.last.number
     "#{trac_url}?new=#{first_rev}&old=#{last_rev}"
   end
 
@@ -54,18 +54,18 @@ class CampfireNotifier
     committers = revisions.collect { |rev| rev.committed_by }.uniq
     committers
   end
-  
+
   def notify_of_build_outcome(build, message)
     return unless enabled?
-    
+
     begin
       client_room = connect
     rescue Broach::AuthenticationError => e
       raise "Campfire Connection Error: #{e.message}"
     end
-      
-    CruiseControl::Log.debug("Campfire notifier: sending notices")      
-    
+
+    CruiseControl::Log.debug("Campfire notifier: sending notices")
+
     committers = get_changeset_committers(build)
 
     title_parts = []
@@ -74,14 +74,17 @@ class CampfireNotifier
 
     title_parts << message
     image = (message == "BROKEN" ? @broken_image : @fixed_image)
-    
-    urls = "#{build.url}" if Configuration.dashboard_url
-    urls += " | #{trac_url_with_query(revisions)}" if trac_url
-  
-    client_room.speak image if image
-    client_room.speak title_parts.join(' ')
-    client_room.paste( build.changeset )  
-    client_room.speak urls
+
+    urls = []
+    urls << build.url if Configuration.dashboard_url
+    urls << trac_url_with_query(revisions) if trac_url
+
+    client_room.speak(image) if image
+    client_room.speak(title_parts.join(' '))
+    client_room.paste(build.changeset)
+    if urls.any?
+      client_room.speak(urls.join(" | "))
+    end
   end
 end
 
