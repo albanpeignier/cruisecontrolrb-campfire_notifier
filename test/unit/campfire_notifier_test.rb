@@ -15,6 +15,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         assert_equal false, @campfire_notifier.ssl
         assert_equal false, @campfire_notifier.only_failed_builds
         assert_equal false, @campfire_notifier.only_fixed_and_broken_builds
+        assert_equal false, @campfire_notifier.only_first_failure
       end
 
       should "not be enabled" do
@@ -87,10 +88,33 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
         should "notify of build outcome" do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
-            @build,
-            "PASSED"
+            @build, "PASSED"
           )
           @campfire_notifier.build_finished(@build)
+        end
+
+        context "and only_failed_builds is true" do
+          setup do
+            @campfire_notifier.only_failed_builds = true
+          end
+
+          should "not notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_finished(@build)
+          end
+        end
+
+        context "and only_first_failure is true" do
+          setup do
+            @campfire_notifier.only_first_failure = true
+          end
+
+          should "notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).with(
+              @build, "PASSED"
+            )
+            @campfire_notifier.build_finished(@build)
+          end
         end
 
         context "and only_fixed_and_broken_builds is true" do
@@ -113,10 +137,33 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
         should "notify of build outcome" do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
-            @build,
-            "FAILED!"
+            @build, "FAILED!"
           )
           @campfire_notifier.build_finished(@build)
+        end
+
+        context "and only_failed_builds is true" do
+          setup do
+            @campfire_notifier.only_failed_builds = true
+          end
+
+          should "not notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).with(
+              @build,"FAILED!"
+            )
+            @campfire_notifier.build_finished(@build)
+          end
+        end
+
+        context "and only_first_failure is true" do
+          setup do
+            @campfire_notifier.only_first_failure = true
+          end
+
+          should "not notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_finished(@build)
+          end
         end
 
         context "and only_fixed_and_broken_builds is true" do
@@ -143,6 +190,31 @@ class CampfireNotifierTest < Test::Unit::TestCase
           @campfire_notifier.build_broken(@build,@previous_build)
         end
 
+        context "and only_failed_builds is true" do
+          setup do
+            @campfire_notifier.only_failed_builds = true
+          end
+
+          should "not notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_broken(@build,@previous_build)
+          end
+        end
+
+        context "and only_first_failure is true" do
+          setup do
+            @campfire_notifier.only_first_failure = true
+          end
+
+          should "notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).with(
+              @build, "BROKE!"
+            )
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_broken(@build,@previous_build)
+          end
+        end
+
         context "and only_fixed_and_broken_builds is true" do
           setup do
             @campfire_notifier.only_fixed_and_broken_builds = true
@@ -150,8 +222,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
           should "notify of build outcome" do
             @campfire_notifier.expects(:notify_of_build_outcome).with(
-              @build,
-              "BROKE!"
+              @build, "BROKE!"
             )
             @campfire_notifier.expects(:notify_of_build_outcome).never
             @campfire_notifier.build_broken(@build,@previous_build)
@@ -167,8 +238,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
 
         should "notify of build outcome" do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
-            @build,
-            "WAS FIXED"
+            @build, "WAS FIXED"
           )
           @campfire_notifier.build_fixed(@build,@previous_build)
         end
@@ -182,6 +252,32 @@ class CampfireNotifierTest < Test::Unit::TestCase
             @campfire_notifier.build_fixed(@build,@previous_build)
           end
         end
+
+        context "and only_first_failure is true" do
+          setup do
+            @campfire_notifier.only_first_failure = true
+          end
+
+          should "not notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_fixed(@build,@previous_build)
+          end
+        end
+
+        context "and only_fixed_and_broken_builds is true" do
+          setup do
+            @campfire_notifier.only_fixed_and_broken_builds = true
+          end
+
+          should "notify of build outcome" do
+            @campfire_notifier.expects(:notify_of_build_outcome).with(
+              @build, "WAS FIXED"
+            )
+            @campfire_notifier.expects(:notify_of_build_outcome).never
+            @campfire_notifier.build_fixed(@build,@previous_build)
+          end
+        end
+
       end
 
       context "and trac url provided" do

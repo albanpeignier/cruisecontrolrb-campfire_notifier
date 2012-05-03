@@ -80,10 +80,22 @@ set up to notify Campfire, configure it with the following:
       project.campfire_notifier.broken_image          = 'http://***/sad.png'
       project.campfire_notifier.fixed_image           = 'http://***/happy.png'
       project.campfire_notifier.only_failed_builds    = true
+      project.campfire_notifier.only_first_failure    = true
       project.campfire_notifier.only_fixed_and_broken_builds = true
     end
 
 These configuration options should be pretty self-explanatory.
+
+Or not.. here's the chart of when notifications are enabled/disabled:
+
+    -----------------------------+------------------+----------------+------------------+----------------+
+    when flag=true               | was broke now ok | success        | was ok now broke | broken         |
+    when flag=true               | build_fixed      | build_finished | build_broken     | build_finished |
+    -----------------------------+------------------+----------------+------------------+----------------+
+    only_failed_builds           |       no         |   no           |       no         |  yes           |
+    only_first_failure           |       no         |   yes          |       yes        |  no            |
+    only_fixed_and_broken_builds |       yes        |   no           |       yes        |  no            |
+    -----------------------------+------------------+----------------+------------------+----------------+
 
 ## Test Coverage
 
