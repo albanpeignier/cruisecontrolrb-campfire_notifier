@@ -1,5 +1,12 @@
 require 'broach'
 
+unless defined?(BuilderPlugin)
+  # Define a dummy Plugin class if not already available
+  # This allows for compatibility with very old cc.rb 1.4 deployments
+  class BuilderPlugin
+  end
+end
+
 class CampfireNotifier < BuilderPlugin
   attr_accessor :account, :token, :room, :trac_url, :broken_image, :fixed_image
   attr_accessor :ssl, :only_failed_builds, :only_fixed_and_broken_builds, :only_first_failure
