@@ -16,7 +16,7 @@ class CampfireNotifier < BuilderPlugin
   alias_method :password=, :token=
 
   def enabled?
-    @account && @token && @room
+    account && token && room
   end
 
   def connect
@@ -24,17 +24,17 @@ class CampfireNotifier < BuilderPlugin
 
     CruiseControl::Log.debug("Campfire notifier: connecting to campfire")
     Broach.settings = {
-      'account' => @account,
-      'token' => @token,
-      'use_ssl' => @ssl
+      'account' => account,
+      'token' => token,
+      'use_ssl' => ssl
     }
-    return Broach::Room.find_by_name(@room)
+    return Broach::Room.find_by_name(room)
   end
 
   def build_finished(build)
-    return if @only_fixed_and_broken_builds
+    return if only_fixed_and_broken_builds
     if build.successful?
-      notify_of_build_outcome(build, "PASSED") unless @only_failed_builds
+      notify_of_build_outcome(build, "PASSED") unless only_failed_builds
     else
       notify_of_build_outcome(build, "FAILED!")
     end
@@ -45,7 +45,7 @@ class CampfireNotifier < BuilderPlugin
   end
 
   def build_fixed(fixed_build, previous_build)
-    notify_of_build_outcome(fixed_build, "WAS FIXED") unless @only_failed_builds
+    notify_of_build_outcome(fixed_build, "WAS FIXED") unless only_failed_builds
   end
 
   def trac_url_with_query(revisions)
@@ -79,7 +79,7 @@ class CampfireNotifier < BuilderPlugin
     title_parts << "Build #{build.label} of #{build.project.name}"
 
     title_parts << message
-    image = (message == "BROKEN" ? @broken_image : @fixed_image)
+    image = (message == "BROKEN" ? broken_image : fixed_image)
 
     urls = []
     urls << build.url if Configuration.dashboard_url
