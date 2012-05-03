@@ -87,7 +87,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         should "notify of build outcome" do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
             @build,
-            "SUCCESS"
+            "PASSED"
           )
           @campfire_notifier.build_finished(@build)
         end
@@ -108,7 +108,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         setup do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
             @build,
-            "BROKEN"
+            "BROKE!"
           )
         end
 
@@ -124,7 +124,7 @@ class CampfireNotifierTest < Test::Unit::TestCase
         setup do
           @campfire_notifier.expects(:notify_of_build_outcome).with(
             @build,
-            "FIXED"
+            "WAS FIXED"
           )
         end
 
@@ -182,7 +182,7 @@ TXT
         @campfire_notifier.stubs(:get_changeset_committers).returns([])
         office_room.expects(:speak).with("fixed image")
         office_room.expects(:speak).with(
-          "Build abcdef of Test Project is SUCCESSFUL"
+          "Build abcdef of Test Project SUCCESSFUL"
         )
         office_room.expects(:paste).with(@build.changeset)
         office_room.expects(:speak).with(

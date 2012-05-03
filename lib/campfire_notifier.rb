@@ -76,7 +76,7 @@ class CampfireNotifier < BuilderPlugin
 
     title_parts = []
     title_parts << "#{committers.to_sentence}:" if committers.any?
-    title_parts << "Build #{build.label} of #{build.project.name} "
+    title_parts << "Build #{build.label} of #{build.project.name}"
 
     title_parts << message
     image = (message == "BROKEN" ? @broken_image : @fixed_image)
