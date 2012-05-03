@@ -88,14 +88,15 @@ These configuration options should be pretty self-explanatory.
 
 Or not.. here's the chart of when notifications are enabled/disabled:
 
-    -----------------------------+------------------+----------------+------------------+----------------+
-    when flag=true               | was broke now ok | success        | was ok now broke | broken         |
-    when flag=true               | build_fixed      | build_finished | build_broken     | build_finished |
-    -----------------------------+------------------+----------------+------------------+----------------+
-    only_failed_builds           |       no         |   no           |       no         |  yes           |
-    only_first_failure           |       no         |   yes          |       yes        |  no            |
-    only_fixed_and_broken_builds |       yes        |   no           |       yes        |  no            |
-    -----------------------------+------------------+----------------+------------------+----------------+
+    +------------------------------+------------------+----------------+------------------+----------------+
+    |                              | was broke now ok | success        | was ok now broke | broken         |
+    | when flag=true               | build_fixed      | build_finished | build_broken     | build_finished |
+    +------------------------------+------------------+----------------+------------------+----------------+
+    | (none - default)             |       no         |   yes          |       no         |  yes           |
+    | only_failed_builds           |       no         |   no           |       no         |  yes           |
+    | only_first_failure           |       no         |   yes          |       yes        |  no            |
+    | only_fixed_and_broken_builds |       yes        |   no           |       yes        |  no            |
+    +------------------------------+------------------+----------------+------------------+----------------+
 
 ## Test Coverage
 

@@ -236,10 +236,8 @@ class CampfireNotifierTest < Test::Unit::TestCase
           @previous_build = stub('Previous Build')
         end
 
-        should "notify of build outcome" do
-          @campfire_notifier.expects(:notify_of_build_outcome).with(
-            @build, "WAS FIXED"
-          )
+        should "not notify of build outcome" do
+          @campfire_notifier.expects(:notify_of_build_outcome).never
           @campfire_notifier.build_fixed(@build,@previous_build)
         end
 

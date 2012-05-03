@@ -46,7 +46,7 @@ class CampfireNotifier < BuilderPlugin
   end
 
   def build_fixed(fixed_build, previous_build)
-    notify_of_build_outcome(fixed_build, "WAS FIXED") unless only_first_failure || only_failed_builds
+    notify_of_build_outcome(fixed_build, "WAS FIXED") if only_fixed_and_broken_builds
   end
 
   def trac_url_with_query(revisions)
