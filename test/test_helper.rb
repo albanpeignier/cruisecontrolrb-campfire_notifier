@@ -6,6 +6,8 @@ require 'mocha'
 class Test::Unit::TestCase
 end
 
+class BuilderPlugin; end
+
 module CruiseControl
   class Log
     def self.debug(message)
@@ -39,4 +41,3 @@ module SourceControl
     end
   end
 end
-
